@@ -71,5 +71,5 @@ print: all
 	@:
 
 test: all
-	./$(TARGET) -e $(SRC) 
+	./$(TARGET) $(SRC) 
 	@:
