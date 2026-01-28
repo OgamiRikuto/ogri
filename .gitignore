@@ -1,0 +1,32 @@
+# --- Build Artifacts (生成物) ---
+# コンパイル済みオブジェクトファイル
+*.o
+*.obj
+
+# 実行バイナリ
+ogri
+a.out
+
+# --- Flex / Bison Generated Files ---
+lex.yy.c
+y.tab.c
+y.tab.h
+y.output
+
+# --- OS / Editor ---
+# Mac
+.DS_Store
+*.dSYM/
+
+# Windows
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Project Specific ---
+tmp.txt
+*.zip
