@@ -23,7 +23,7 @@ REXP	= rexp.lex
 LEXC	= lex.yy.c
 SYNS	= syns.yac
 YACC	= y.tab.c
-SRC	?= main.ogri
+SRC	?= examples/main.ogri
 TMP	= tmp.txt
 ARC	= MyLanguage
 
@@ -53,7 +53,7 @@ $(YACC): $(SYNS) $(LEXC) $(DEFS)
 	@$(YAC) $(SYNS)
 
 clean:
-	-rm -f $(TARGET)* $(OBJS) $(LEXC) $(YACC) $(TMP) $(CCTEMPS) $(ARC).zip *\~
+	@rm -f $(TARGET)* $(OBJS) $(LEXC) $(YACC) $(TMP) $(CCTEMPS) $(ARC).zip *\~
 
 zip: clean
 	mkdir $(ARC)
@@ -73,3 +73,10 @@ print: all
 test: all
 	./$(TARGET) $(SRC) 
 	@:
+
+install: all
+	@install -m 755 $(TARGET) /usr/local/bin/$(TARGET)
+	@make clean
+	@:
+
+.PHONY: all clean zip print test install
