@@ -3,10 +3,6 @@
 *.o
 *.obj
 
-# 実行バイナリ
-ogri
-a.out
-
 # --- Flex / Bison Generated Files ---
 lex.yy.c
 y.tab.c

@@ -1,0 +1,196 @@
+/**
+ * Ogri言語 構文マニュアル
+ */
+
+// 1. 代入について
+says with "\n--- 1. 代入 (Assignment) ---\n".
+
+/**
+ * 代入には is と are の2種類があります.
+ * is : 1つの値を代入します.
+ * are: 値をリストとして代入します.
+ */
+
+// is を使用した代入
+x is 10.
+say with f"x = [x].".
+
+y is 20.
+say with f"y = [y].".
+
+// 変数の再代入
+x is y. // x に y の値(20)を代入します.
+say with f"x = [x].".
+
+// are を使用したリスト代入
+z are 10. // 値が1つでもリスト [10] になります.
+say with f"z = [z].".
+
+z are x, y. // 複数の要素を持つリスト [20, 20] になります.
+say with f"z = [z].".
+
+x, y, z are 100, 200, 300. // 複数の値に代入する際はリストになりません.
+say with f"x = [x].".
+say with f"y = [y].".
+say with f"z = [z].".
+
+a, b are x, y, z. // 左辺と右辺の要素数が一位していない代入の場合、値が捨てられます.
+say with f"a = [a].\nb = [b].".
+
+
+// 型について
+// 型宣言は不要です. 文字列もリストもそのまま代入できます.
+str is "Hello World".
+list are x, y, z, str.
+say with f"list = [list].".
+
+
+// 2. 配列アクセスについて
+says with "\n--- 2. 配列アクセス (Array Access) ---\n".
+
+/**
+ * 配列の要素を取得するには at を使用します.
+ * インデックス at 配列名 の順で書きます.
+ */
+
+first is 0 at list. // リストの0番目の要素を取得.
+say with f"first = [first].".
+
+// 要素の書き換え
+tmp is 999.
+0 at list is tmp. // 0番目の要素を999に変更.
+say with f"list = [list].".
+
+
+// 3. スライスについて
+says with "\n--- 3. スライス (Slicing) ---\n".
+
+/**
+ * リストの一部を切り出すには from を使用します.
+ * 開始 to 終了 from 配列名 の順で書きます.
+ */
+
+nums are 1, 2, 3, 4, 5.
+
+// 1番目から3番目の手前まで ([2, 3])
+sub is 1 to 3 from nums.
+say with f"1 to 3: [sub].".
+
+// 先頭から2番目の手前まで ([1, 2])
+head is to 2 from nums.
+say with f"to 2: [head].".
+
+// 3番目から最後まで ([4, 5])
+tail is 3 to end from nums.
+say with f"to end: [tail].".
+
+
+// 4. 分岐について
+says with "\n--- 4. 分岐 (Branching) ---\n".
+
+/**
+ * 分岐には when と otherwise を使用します.
+ * 比較演算子は言葉で表現できます.(演算子を使うこともできます)
+ * * == : is same as
+ * != : is not same as
+ * <  : is less than
+ * >  : is larger than
+ * <= : is less    (以下)
+ * >= : is larger  (以上)
+ * * 文末には必ずピリオド . を打ってください.
+ */
+
+// 1行で書く場合 (カンマで区切ります)
+when x is less than 100, say with "x is small.".
+
+// 複数行の場合 (インデントします)
+x is 200.
+when x is larger than 100,
+    say with "x is large.".
+    say with f"val = [x].".
+
+// 複数の条件分岐 (otherwise when)
+when x is same as 0,
+    say with "Zero.".
+otherwise when x is larger 100, // 100以上
+    say with "Huge.".
+otherwise,
+    say with "Normal.".
+
+
+// 5. 繰り返しについて
+says with "\n--- 5. 繰り返し (Loops) ---\n".
+
+/**
+ * 繰り返しには repeat を使用します.
+ * until: 条件が満たされるまで
+ * foreach: リストの要素を順に取り出す
+ */
+
+// until (条件式) that
+count is 0.
+// countが3未満の間 (3以上になるまで)
+repeat until count is larger 3 that
+    say with f"count = [count].".
+    count is count plus 1.
+
+// foreach (要素) in (リスト) that
+repeat item foreach list that
+    say with f"item = [item].".
+
+
+// 6. 関数について
+says with "\n--- 6. 関数 (Functions) ---\n".
+
+/**
+ * 定義: define 名前 using 引数 that
+ * 呼出: 名前 with 引数
+ */
+
+// 引数なしの関数
+define greet that
+    say with "Hello!".
+
+greet with.
+
+// 引数ありの関数
+define add_calc using a, b that
+    return a plus b.
+
+res is add_calc with 10, 20.
+say with f"10 + 20 = [res].".
+
+// 複数の戻り値 (リストとして返ります)
+define swap using a, b that
+    return b, a.
+
+pair is swap with 1, 2.
+say with f"swapped = [pair].".
+
+
+// 7. ビルトイン関数について
+says with "\n--- 7. ビルトイン関数 (Built-in) ---\n".
+
+/**
+ * range: 連番リストを作成 (start, end, step)
+ * len:   リストの長さを取得
+ * push:  末尾に追加
+ * pop:   末尾から削除して取得
+ * to_int: 整数へ変換
+ * listen: 入力を受け取る
+ */
+
+// range と len
+nums is range with 1, 6. // 1から5まで
+len_val is len with nums.
+say with f"nums: [nums] (len: [len_val]).".
+
+// push (リスト自体を変更します)
+push with nums, 100.
+say with f"after push: [nums].".
+
+// pop (取り出した値を返し、リストから消します)
+val is pop with nums.
+say with f"popped: [val].".
+say with f"after pop: [nums].".
+

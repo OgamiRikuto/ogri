@@ -1,0 +1,325 @@
+%{
+#include "defs.h"
+extern int raw_lexer(void);
+extern int pendin;
+#define YYSTYPE Ast*
+%}
+%token  IS ARE OF AT FROM TO END 
+        WHEN OTHERWISE  REPEAT UNTIL FOREACH
+        DEFINE USING THAT RETURN WITH BREAK CONTINUE
+        IDENTIFIER
+        INTEGER REAL STRING F_OPEN F_CLOSE FSTRING_TEXT
+        COMMA PERIOD
+        ADD SUBTRACT MULTIPLY DIVIDE REMAINDER L_PAR R_PAR L_BRACKET R_BRACKET
+        EQUAL NEQUAL LESS LARGE NLESS NLARGE AND OR NOT
+        NEWLINE INDENT DEDENT
+        UNKNOWN;
+%left OR
+%left AND
+%nonassoc EQUAL NEQUAL LESS LARGE NLESS NLARGE
+%left ADD SUBTRACT
+%left MULTIPLY DIVIDE REMAINDER
+%right NOT
+%left WITH
+%left OF
+%left COMMA
+%nonassoc LOWER_THAN_OTHERWISE
+%nonassoc OTHERWISE WHEN
+%%
+program
+    :
+        { root_ast = NULL; }
+    | statements
+        { $$ = $1; root_ast = $$; }
+
+statements
+    : statement
+        { $$ = $1; }
+    | statements statement
+        { $$ = ($1 == NULL) ? $2 : ast_stmts($1, $2, yylineno); }
+    | statements NEWLINE
+        { $$ = $1; }
+    | NEWLINE
+        { $$ = NULL; }
+
+statement
+    : simple_stmt PERIOD
+        { $$ = $1; }
+    | compound_stmt
+        { $$ = $1; }
+
+simple_stmt
+    : assignment
+        { $$ = $1; }
+    | array_assignment
+        { $$ = $1; }
+    | function_call
+        { $$ = $1; }
+    | return_stmt
+        { $$ = $1; }
+    | break_stmt
+        { $$ = $1; }
+    | continue_stmt
+        { $$ = $1; }
+
+compound_stmt
+    : when_stmt
+        { $$ = $1; }
+    | repeat_stmt
+        { $$ = $1; }
+    | function_def
+        { $$ = $1; }
+
+assignment
+    : left_value IS expression
+        { $$ = ast_assign($1, $3, 0, yylineno); }
+
+array_assignment
+    : left_value ARE value_list
+        { $$ = ast_assign($1, $3, 1, yylineno); }
+
+left_value
+    : array_access
+        { $$ = $1; }
+    | identifier_list
+        { $$ = $1; }
+
+identifier_list
+    : identifier
+        { $$ = $1; }
+    | identifier_list COMMA identifier
+        { $$ = ast_identifier_list($1, $3, yylineno); }
+
+return_stmt
+    : RETURN
+        { $$ = ast_return(NULL, yylineno); }
+    | RETURN value_list
+        { $$ = ast_return($2, yylineno); }
+
+break_stmt
+    : BREAK
+        { $$ = ast_break(yylineno); }
+
+continue_stmt
+    : CONTINUE
+        { $$ = ast_continue(yylineno); }
+
+block 
+    : NEWLINE INDENT statements DEDENT
+        { $$ = ast_block($3, yylineno); }
+    | statement block_terminator
+        { $$ = ast_block($1, yylineno); }
+
+block_terminator
+    :
+        { $$ = NULL; }
+    | NEWLINE
+        { $$ = NULL; }
+
+when_stmt
+    : WHEN expression COMMA block %prec LOWER_THAN_OTHERWISE
+        { $$ = ast_when($2, $4, NULL, NULL, yylineno); }
+    | WHEN expression COMMA block otherwise_when_clauses
+        { $$ = ast_when($2, $4, $5, NULL, yylineno); }
+    | WHEN expression COMMA block otherwise_clauses
+        { $$ = ast_when($2, $4, NULL, $5, yylineno); }
+
+otherwise_when_clauses
+    : OTHERWISE WHEN expression COMMA block
+        { $$ = ast_otherwhen($3, $5, NULL, yylineno); }
+    | OTHERWISE WHEN expression COMMA block otherwise_when_clauses
+        { $$ = ast_otherwhen($3, $5, $6, yylineno); }
+    | OTHERWISE WHEN expression COMMA block otherwise_clauses
+        { $$ = ast_otherwhen($3, $5, $6, yylineno); }
+
+otherwise_clauses
+    : OTHERWISE COMMA block
+        { $$ = $3; }
+
+repeat_stmt
+    : REPEAT UNTIL expression THAT block
+        { $$ = ast_repeat_until($3, $5, yylineno); }
+    | REPEAT identifier FOREACH iterator THAT block
+        { $$ = ast_repeat($2, $4, $6, yylineno); }
+
+iterator
+    : value_list
+        { $$ = $1; }
+
+function_def
+    : DEFINE identifier THAT block
+        { $$ = ast_func_def($2, NULL, $4, yylineno); }
+    | DEFINE identifier USING identifier_list THAT block
+        { $$ = ast_func_def($2, $4, $6, yylineno); }
+
+expression
+    : logical_or
+        { $$ = $1; }
+
+logical_or
+    : logical_and
+        { $$ = $1; }
+    | logical_or OR logical_and
+        { $$ = ast_binop("or", $1, $3, yylineno); }
+
+logical_and
+    : comparison
+        { $$ = $1; }
+    | logical_and AND comparison
+        { $$ = ast_binop("and", $1, $3, yylineno); }
+
+comparison
+    : sum
+        { $$ = $1; }
+    | sum EQUAL sum
+        { $$ = ast_binop("==", $1, $3, yylineno); }
+    | sum NEQUAL sum
+        { $$ = ast_binop("!=", $1, $3, yylineno); }
+    | sum LESS sum
+        { $$ = ast_binop("<", $1, $3, yylineno); }
+    | sum LARGE sum
+        { $$ = ast_binop(">", $1, $3, yylineno); }
+    | sum NLARGE sum
+        { $$ = ast_binop("<=", $1, $3, yylineno); }
+    | sum NLESS sum
+        { $$ = ast_binop(">=", $1, $3, yylineno); }
+
+sum
+    : term
+        { $$ = $1; }
+    | sum ADD term
+        { $$ = ast_binop("+", $1, $3, yylineno); }
+    | sum SUBTRACT term
+        { $$ = ast_binop("-", $1, $3, yylineno); }
+
+term
+    : factor
+        { $$ = $1; }
+    | term MULTIPLY factor
+        { $$ = ast_binop("*", $1, $3, yylineno); }
+    | term DIVIDE factor
+        { $$ = ast_binop("/", $1, $3, yylineno); }
+    | term REMAINDER factor
+        { $$ = ast_binop("%", $1, $3, yylineno); }
+
+factor
+    : ADD factor
+        { $$ = ast_unary("+", $2, yylineno); }
+    | SUBTRACT factor   
+        { $$ = ast_unary("-", $2, yylineno); }
+    | NOT factor
+        { $$ = ast_unary("not", $2, yylineno); }
+    | primary
+        { $$ = $1; }
+
+primary
+    : atom
+        { $$ = $1; }
+
+atom
+    : number
+        { $$ = $1; }
+    | string
+        { $$ = $1; }
+    | fstring
+        { $$ = $1; }
+    | identifier
+        { $$ = $1; }
+    | L_PAR expression R_PAR
+        { $$ = $2; }
+    | function_call
+        { $$ = $1; }
+    | array_access
+        { $$ = $1; }
+
+number
+    : INTEGER
+        { $$ = ast_integer(yytext, yylineno); }
+    | REAL
+        { $$ = ast_real(yytext, yylineno); }
+
+string
+    : STRING
+        { $$ = $1; }
+
+fstring
+    : F_OPEN fstring_parts F_CLOSE
+        { $$ = ast_fstring($2, yylineno); }
+
+fstring_parts
+    : fstring_part
+        { $$ = ast_fstring_parts($1, NULL, yylineno); }
+    | fstring_parts fstring_part
+        { $$ = ast_fstring_parts($1, $2, yylineno); }
+
+fstring_part
+    : FSTRING_TEXT
+        { $$ = $1; }
+    | L_BRACKET expression R_BRACKET
+        { $$ = $2; }
+
+function_call
+    : identifier WITH
+        { $$ = ast_func_call($1, NULL, yylineno); }
+    | identifier WITH value_list
+        { $$ = ast_func_call($1, $3, yylineno); }
+
+value_list
+    : sum
+        { $$ = ast_value_list($1, NULL, yylineno); }
+    | value_list COMMA sum
+        { $$ = ast_value_list($1, $3, yylineno); }
+
+identifier
+    : IDENTIFIER
+        { $$ = $1; }
+
+array_access
+    : atom AT atom
+        { $$ = ast_array_access($1, $3, yylineno); }
+    | slice_range FROM atom
+        { $$ = ast_slice($1, $3, yylineno); }
+
+slice_range
+    : sum TO sum
+        { $$ = ast_range($1, $3, yylineno); }
+    | TO sum 
+        { $$ = ast_range(NULL, $2, yylineno); }
+    | sum TO END
+        { $$ = ast_range($1, NULL, yylineno); }
+
+%%
+#include "lex.yy.c"
+
+
+
+int yylex(void) {
+    int token;
+    static int eof_reached = 0;
+
+    if(pendin > 0) {
+        pendin--;
+        token =  DEDENT;
+    } else if(eof_reached && sp > 0) {
+        sp--;
+        token = DEDENT;
+    } else {
+        token = raw_lexer();
+        if(token == 0) {
+            eof_reached = 1;
+            if(sp > 0) {
+                sp--;
+                token = DEDENT;
+            }
+        }
+    }
+    return token;
+}
+
+void yyerror(char *s) {
+	fprintf(stderr, "\n%s at %d: nearby \"%s\"\n\n", s, linecounter, yytext);
+	exit(EXIT_FAILURE);
+}
+
+
+
