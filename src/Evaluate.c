@@ -248,7 +248,7 @@ Object* eval_repeat_until(Ast* node, Environment* env, Interpreter* interpreter)
     while(1) {
         Object* condition = eval(node->repeat_until_stmt.cond, env, interpreter);
 
-        if(!is_true(condition)) break;
+        if(is_true(condition)) break;
 
         result = eval(node->repeat_until_stmt.block, env, interpreter);
 
