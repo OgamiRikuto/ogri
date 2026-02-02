@@ -43,20 +43,20 @@ int fstring_flag = 0;
         }
     }
 }
-is[ \t]+same[ \t]+as 			{ return EQUAL; }
-is[ \t]+not[ \t]+same[ \t]+as	{return NEQUAL; }
-is[ \t]+less[ \t]+than			{ return LESS; }
-is[ \t]+larger[ \t]+than		{ return LARGE; }
-is[ \t]+less					{ return NLARGE; }
-is[ \t]+larger					{ return NLESS; }
-plus							{ return ADD; }
-minus							{ return SUBTRACT; }
-times							{ return MULTIPLY; }
-divided[ \t]+by					{ return DIVIDE; }
-remainder						{ return REMAINDER; }
-is                      { return IS; }
-are						{ return ARE;}
-of						{ return OF; }
+is[ \t]+same[ \t]+as 				{ return EQUAL; }
+is[ \t]+not[ \t]+same[ \t]+as		{ return NEQUAL; }
+is[ \t]+less[ \t]+than				{ return LESS; }
+is[ \t]+larger[ \t]+than			{ return LARGE; }
+is[ \t]+not[ \t]+larger[ \t]+than	{ return NLARGE; }
+is[ \t]+not[ \t]+less[ \t]+than		{ return NLESS; }
+plus								{ return ADD; }
+minus								{ return SUBTRACT; }
+times								{ return MULTIPLY; }
+divided[ \t]+by						{ return DIVIDE; }
+remainder							{ return REMAINDER; }
+is                      		{ return IS; }
+are								{ return ARE;}
+of								{ return OF; }
 at								{ return AT; }
 from							{ return FROM; }
 to								{ return TO; }
