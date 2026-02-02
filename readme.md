@@ -115,8 +115,8 @@ repeat until count is larger than 5 that
 | is not same as | 等しくない | `!=` |
 | is less than | 未満 | `<` |
 | is larger than | より大きい | `>` |
-| is less | 以下 | `<=` |
-| is larger | 以上 | `>=` |
+| is not larger than | 以下 | `<=` |
+| is not less than | 以上 | `>=` |
 
 ### 5. 関数定義と関数呼び出し
 `define ... that`を使用して関数を定義します。  
