@@ -110,7 +110,7 @@ repeat until count is larger than 5 that
 | minus | 引く | `-` |
 | times | 掛ける | `*` |
 | divided by | 割る | `/` |
-| remainder | あまり | `%` |
+| modulo | あまり | `%` |
 | is same as | 等しい | `==` |
 | is not same as | 等しくない | `!=` |
 | is less than | 未満 | `<` |
