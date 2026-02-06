@@ -2,8 +2,8 @@ define fizzbuzz using limit that
     number is 1.
 
     repeat until number is larger than limit that
-        is_fizz is number remainder 3 is same as 0.
-        is_buzz is number remainder 5 is same as 0.
+        is_fizz is number modulo 3 is same as 0.
+        is_buzz is number modulo 5 is same as 0.
 
         when is_fizz and is_buzz,
             say with "FizzBuzz".
