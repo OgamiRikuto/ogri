@@ -53,7 +53,7 @@ plus								{ return ADD; }
 minus								{ return SUBTRACT; }
 times								{ return MULTIPLY; }
 divided[ \t]+by						{ return DIVIDE; }
-remainder							{ return REMAINDER; }
+modulo							{ return REMAINDER; }
 is                      		{ return IS; }
 are								{ return ARE;}
 of								{ return OF; }
