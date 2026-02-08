@@ -95,8 +95,8 @@ says with "\n--- 4. 分岐 (Branching) ---\n".
  * != : is not same as
  * <  : is less than
  * >  : is larger than
- * <= : is less    (以下)
- * >= : is larger  (以上)
+ * <= : is not larger than    (以下)
+ * >= : is not less than  (以上)
  * * 文末には必ずピリオド . を打ってください.
  */
 
